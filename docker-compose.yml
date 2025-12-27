@@ -15,7 +15,7 @@ services:
       dockerfile: Dockerfile
     container_name: backend
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/travel-db
+      - MONGO_URI=mongodb://mongodb:27017/wanderly
       - PORT=5000
       - NODE_ENV=production
     depends_on:

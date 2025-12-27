@@ -44,22 +44,64 @@ function BookingContent() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const nextStep = () => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const nextStep = async () => {
         if (step === 3) {
-            const duration = 5 * 1000;
-            const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
-            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+            setIsLoading(true);
+            setError(null);
+            try {
+                const response = await fetch('/api/bookings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        phone: formData.phone,
+                        email: formData.email,
+                        destination: formData.destination,
+                        travelDate: formData.date
+                    }),
+                });
 
-            const interval: any = setInterval(function () {
-                const timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                const particleCount = 50 * (timeLeft / duration);
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-            }, 250);
+                const data = await response.json();
 
-            setShowSuccess(true);
+                if (!response.ok) {
+                    throw new Error(data.message || 'Something went wrong');
+                }
+
+                // Success logic
+                const duration = 5 * 1000;
+                const animationEnd = Date.now() + duration;
+                const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+                const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+                const interval: any = setInterval(function () {
+                    const timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) return clearInterval(interval);
+                    const particleCount = 50 * (timeLeft / duration);
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                }, 250);
+
+                setShowSuccess(true);
+                // Clear form
+                setFormData({
+                    destination: "",
+                    date: "",
+                    travelers: 1,
+                    name: "",
+                    email: "",
+                    phone: ""
+                });
+            } catch (err: any) {
+                console.error("Booking submission error:", err);
+                setError(err.message || 'Failed to submit booking. Please try again.');
+            } finally {
+                setIsLoading(false);
+            }
         } else {
             setStep((s) => Math.min(s + 1, 3));
         }
@@ -364,23 +406,39 @@ function BookingContent() {
                                 )}
                             </AnimatePresence>
 
-                            <div className="mt-auto pt-6 flex items-center justify-between">
-                                {step > 1 ? (
-                                    <button
-                                        onClick={prevStep}
-                                        className="flex items-center gap-3 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-primary transition-all"
-                                    >
-                                        <ArrowLeft className="w-4 h-4" /> Previous
-                                    </button>
-                                ) : <div />}
+                            <div className="mt-auto pt-6 flex flex-col gap-4">
+                                {error && (
+                                    <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400 text-[10px] font-black uppercase tracking-widest animate-shake">
+                                        <XCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between">
+                                    {step > 1 ? (
+                                        <button
+                                            onClick={prevStep}
+                                            disabled={isLoading}
+                                            className="flex items-center gap-3 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <ArrowLeft className="w-4 h-4" /> Previous
+                                        </button>
+                                    ) : <div />}
 
-                                <button
-                                    onClick={nextStep}
-                                    className="px-12 py-6 bg-primary dark:bg-accent text-white rounded-[2rem] font-black text-[12px] uppercase tracking-[0.3em] shadow-2xl hover:bg-accent transition-all flex items-center gap-4 group"
-                                >
-                                    {step === 3 ? "Confirm Invitation" : "Continue"}
-                                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                </button>
+                                    <button
+                                        onClick={nextStep}
+                                        disabled={isLoading}
+                                        className="px-12 py-6 bg-primary dark:bg-accent text-white rounded-[2rem] font-black text-[12px] uppercase tracking-[0.3em] shadow-2xl hover:bg-accent transition-all flex items-center gap-4 group disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isLoading ? (
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <>
+                                                {step === 3 ? "Confirm Invitation" : "Continue"}
+                                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
