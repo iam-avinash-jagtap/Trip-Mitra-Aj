@@ -3,7 +3,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useState } from "react";
-import { MapPin, Phone, Mail, Send, Clock, MessageSquare, Globe, Instagram, Facebook, Twitter, Linkedin, X, CheckCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Send, Clock, MessageSquare, Globe, Instagram, Facebook, Twitter, Linkedin, X, CheckCircle, XCircle } from "lucide-react";
 import Image from "next/image";
 
 export default function ContactPage() {
@@ -16,27 +16,54 @@ export default function ContactPage() {
     });
 
     const [showModal, setShowModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically handle the API call
-        console.log("Form submitted:", formData);
+        setIsLoading(true);
+        setError(null);
 
-        // Reset form
-        setFormData({
-            name: "",
-            number: "",
-            email: "",
-            subject: "",
-            message: ""
-        });
+        try {
+            const response = await fetch('/api/inquiries', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: formData.name,
+                    phone: formData.number,
+                    email: formData.email,
+                    subject: formData.subject,
+                    message: formData.message
+                }),
+            });
 
-        // Show success modal
-        setShowModal(true);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Something went wrong');
+            }
+
+            // Success
+            setShowModal(true);
+            setFormData({
+                name: "",
+                number: "",
+                email: "",
+                subject: "",
+                message: ""
+            });
+        } catch (err: any) {
+            console.error("Submission error:", err);
+            setError(err.message || "Failed to send message. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -197,9 +224,26 @@ export default function ContactPage() {
                                     ></textarea>
                                 </div>
 
-                                <button type="submit" className="w-full py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-orange-500/30 hover:from-red-600 hover:to-orange-600 transition-all transform hover:-translate-y-1 flex items-center justify-center space-x-3">
-                                    <span>Send Message</span>
-                                    <Send className="w-5 h-5" />
+                                {error && (
+                                    <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-bold flex items-center gap-2 animate-shake">
+                                        <XCircle className="w-4 h-4" />
+                                        {error}
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold text-lg rounded-xl shadow-lg shadow-orange-500/30 hover:from-red-600 hover:to-orange-600 transition-all transform hover:-translate-y-1 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isLoading ? (
+                                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            <span>Send Message</span>
+                                            <Send className="w-5 h-5" />
+                                        </>
+                                    )}
                                 </button>
                                 <p className="text-center text-gray-400 text-sm mt-4">We respect your privacy. No spam.</p>
                             </form>
