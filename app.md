@@ -1,6 +1,6 @@
-# 🚀 Deployment Guide: Running TripMitraAj on AWS EC2
+# 🚀 Deployment Guide: Running wonderly on AWS EC2
 
-This guide providing step-by-step instructions to deploy the TripMitraAj application on an AWS EC2 instance using Docker.
+This guide providing step-by-step instructions to deploy the wonderly application on an AWS EC2 instance using Docker.
 
 ---
 
@@ -54,10 +54,10 @@ Clone your project code from GitHub/GitLab to the EC2 instance.
 
 ```bash
 # Replace with your actual repository URL
-git clone https://github.com/your-username/TripMitraAj.git
+git clone https://github.com/your-username/wonderly.git
 
 # Move into the project directory
-cd TripMitraAj
+cd wonderly
 ```
 
 ---

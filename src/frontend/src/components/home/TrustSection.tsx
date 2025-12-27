@@ -106,7 +106,7 @@ export const TrustSection = () => {
                             viewport={{ once: true }}
                             className="relative h-80 rounded-[3rem] overflow-hidden shadow-2xl"
                         >
-                            <Image src="/t-ladakh.png" alt="Happy Travelers" fill className="object-cover" unoptimized />
+                            <Image src="/images/t-ladakh.png" alt="Happy Travelers" fill className="object-cover" unoptimized />
                             <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black text-gray-900 uppercase">Ladakh Rider Group</div>
                         </motion.div>
                         <motion.div
@@ -117,10 +117,10 @@ export const TrustSection = () => {
                             className="space-y-4"
                         >
                             <div className="relative h-36 rounded-[2rem] overflow-hidden shadow-xl">
-                                <Image src="/t-kedarnath.png" alt="Kedarnath Yatra" fill className="object-cover" unoptimized />
+                                <Image src="/images/t-kedarnath.png" alt="Kedarnath Yatra" fill className="object-cover" unoptimized />
                             </div>
                             <div className="relative h-48 rounded-[2rem] overflow-hidden shadow-xl">
-                                <Image src="/t-goa.png" alt="Goa Family" fill className="object-cover object-top" unoptimized />
+                                <Image src="/images/t-goa.png" alt="Goa Family" fill className="object-cover object-top" unoptimized />
                             </div>
                         </motion.div>
                     </div>
@@ -232,7 +232,7 @@ export const TrustSection = () => {
                             <div className="flex -space-x-3">
                                 {[1, 2, 3, 4].map(i => (
                                     <div key={i} className="w-10 h-10 rounded-full border-2 border-gray-900 overflow-hidden relative bg-gray-800">
-                                        <Image src={`https://randomuser.me/api/portraits/thumb/men/${i + 20}.jpg`} alt="Team" fill />
+                                        <Image src={`https://randomuser.me/api/portraits/thumb/women/${i + 30}.jpg`} alt="Team" fill />
                                     </div>
                                 ))}
                             </div>

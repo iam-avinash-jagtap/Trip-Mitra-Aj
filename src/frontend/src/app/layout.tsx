@@ -36,6 +36,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${manrope.variable} ${inter.variable} ${serif.variable} antialiased font-body text-gray-900 bg-white`}
+        suppressHydrationWarning
       >
         <ThemeProvider
           attribute="class"
