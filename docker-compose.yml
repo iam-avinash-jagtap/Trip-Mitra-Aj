@@ -1,42 +1,53 @@
+version: "3.8"
+
+networks:
+  wanderly-network:
+    name: wanderly-network
+    driver: bridge
+
+volumes:
+  wanderly-storage:
+    name: wanderly-storage
+
 services:
   frontend:
-    build:
-      context: ./src/frontend
-      dockerfile: Dockerfile
-    container_name: frontend
-    environment:
-      - NEXT_PUBLIC_API_URL=/api
+    image: avi004/wanderly-frontend:latest
+    container_name: wanderly-frontend
+    restart: always
     depends_on:
       - backend
+    networks:
+      - wanderly-network
 
   backend:
-    build:
-      context: ./src/backend
-      dockerfile: Dockerfile
-    container_name: backend
+    image: avi004/wanderly-backend:latest
+    container_name: wanderly-backend
+    restart: always
     environment:
-      - MONGO_URI=mongodb://mongodb:27017/wanderly
-      - PORT=5000
-      - NODE_ENV=production
+      MONGO_URI: mongodb://mongodb:27017/wanderly
+      NODE_ENV: production
     depends_on:
       - mongodb
+    networks:
+      - wanderly-network
 
   mongodb:
     image: mongo:6
-    container_name: mongodb
+    container_name: wanderly-mongodb
+    restart: always
     volumes:
-      - mongodb_data:/data/db
+      - wanderly-storage:/data/db
+    networks:
+      - wanderly-network
 
   nginx:
-    image: nginx:latest
-    container_name: nginx
+    image: avi004/wanderly-nginx:latest
+    container_name: wanderly-nginx
+    restart: always
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - frontend
       - backend
-
-volumes:
-  mongodb_data:
+    networks:
+      - wanderly-network
