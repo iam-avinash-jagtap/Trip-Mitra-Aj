@@ -1,224 +1,140 @@
-# 🌍 Wanderly – Premium Travel Booking Platform
+# 🌍 Wanderly — Premium Travel Booking Platform
 
-**Wanderly** is a boutique, premium travel and experience booking platform built for modern explorers.
-Designed with a strong focus on **UI/UX, performance, and scalability**, and deployed using **Docker on AWS EC2**.
+**Wanderly** is a modern, production-ready **travel booking & inquiry platform** designed for real-world scalability and cloud deployment.
+
+It supports:
+
+* 🧳 Real-time trip bookings
+* 📩 Contact & inquiry management
+* 📊 Admin dashboards (Bookings & Inquiries)
+* 🐳 Fully Dockerized architecture
+* ☁️ Cloud-native deployment on AWS
 
 ---
 
-## 🚀 Production Deployment on AWS EC2 (Docker)
+## 🧠 Tech Stack
 
-This guide explains how to deploy Wanderly on an **EC2 instance running Amazon Linux** using **Docker & Docker Compose**.
+### 🌐 Frontend
+
+* **Next.js 14**
+* **TypeScript**
+* Modern UI / UX (Admin dashboards, tables)
+
+### ⚙️ Backend
+
+* **Node.js**
+* **Express.js**
+* REST APIs (`/api/bookings`, `/api/inquiries`)
+
+### 🗄️ Database
+
+* **MongoDB**
+* Persistent Docker volume (no data loss)
+
+### 🚦 Reverse Proxy
+
+* **Nginx**
+* Single public entry point (Port 80)
+
+### 🐳 Containerization
+
+* **Docker**
+* **Docker Compose**
+* Images hosted on **Docker Hub**
 
 ---
 
 ## 🧱 Architecture Overview
 
-```text
+```
 Internet
    |
-   | (HTTP / HTTPS)
+   |  HTTP (Port 80)
    |
-EC2 Instance (Amazon Linux)
+AWS EC2
    |
    ├── Nginx (Reverse Proxy)
-   │      └── Port 80 / 443
+   │      ├── /        → Frontend (Next.js)
+   │      └── /api     → Backend (Express)
    |
-   ├── Frontend (Next.js)
-   │      └── Port 3000 (internal)
-   |
-   ├── Backend (Express API)
-   │      └── Port 5000 (internal)
-   |
-   └── MongoDB
-          └── Port 27017 (internal only)
+   ├── Frontend Container
+   ├── Backend Container
+   └── MongoDB Container (Internal only)
 ```
 
----
-
-## 🔐 Required AWS Security Group Ports
-
-Configure the **EC2 Security Group** with the following inbound rules:
-
-| 🔌 Port | 📡 Protocol | 🌐 Source | 🎯 Purpose             |
-| ------: | ----------- | --------- | ---------------------- |
-|      22 | TCP         | Your IP   | SSH Access             |
-|      80 | TCP         | 0.0.0.0/0 | HTTP (Public Access)   |
-|     443 | TCP         | 0.0.0.0/0 | HTTPS                  |
-|    3000 | TCP         | ❌         | Internal (Docker only) |
-|    5000 | TCP         | ❌         | Internal (Docker only) |
-|   27017 | TCP         | ❌         | Internal Database      |
-
-⚠️ **Do NOT expose ports 3000, 5000, or 27017 publicly in production.**
+✔ Secure
+✔ Scalable
+✔ Production-grade
 
 ---
 
-## 🖥️ EC2 Instance Requirements
+## ☁️ Setup — AWS
 
-* 🐧 **OS**: Amazon Linux 2 / Amazon Linux 2023
-* 💻 **Instance Type**: `t2.micro` (minimum) / `t3.small`
-* 💾 **Storage**: 20 GB minimum
-* 🌐 **Elastic IP**
+### ✅ EC2 Requirements
+
+* **OS**: Amazon Linux 2 / Amazon Linux 2023
+* **Instance Type**: `t2.micro` (minimum) / `t3.small` recommended
+* **Storage**: 20 GB
+* **Security Group**:
+
+  * Port `22` → SSH
+  * Port `80` → HTTP
+  * ❌ Do NOT expose MongoDB
 
 ---
 
-## ⚙️ EC2 Initial Setup (Amazon Linux)
+## 🚀 Quick Start (Production)
+
+### 🔥 Only Two Commands Needed
+
+Once Docker & Docker Compose are installed on EC2:
 
 ```bash
-# Connect to EC2
-ssh -i your-key.pem ec2-user@<EC2_PUBLIC_IP>
-
-# Update system
-sudo yum update -y
+docker-compose pull
+docker-compose up -d
 ```
 
----
-
-### 🐳 Install Docker
-
-```bash
-sudo yum install docker -y
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker ec2-user
-logout
-```
-
-🔁 Login again for Docker group changes to apply.
+That’s it ✅
+No build. No source code required.
 
 ---
 
-### 🧩 Install Docker Compose
+## 🧠 What `docker-compose.yml` Creates
 
-```bash
-sudo curl -L https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 \
--o /usr/local/bin/docker-compose
+When you run `docker-compose up -d`, it automatically creates:
 
-sudo chmod +x /usr/local/bin/docker-compose
-docker-compose version
-```
+### 🔹 Containers
 
----
+* `wanderly-frontend` → Next.js UI
+* `wanderly-backend` → Express APIs
+* `wanderly-mongodb` → Database
+* `wanderly-nginx` → Reverse proxy
 
-## 📦 Clone the Repository
+### 🔹 Network
 
-```bash
-git clone https://github.com/iam-avinash-jagtap/Wander-Ly
-cd Wander-Ly
-```
+* `wanderly-network`
+* Private communication between containers
 
----
+### 🔹 Storage
 
-## 🐳 Docker-Based Deployment
+* `wanderly-storage`
+* Persistent MongoDB data across restarts
 
-### ⚡ One Command Deployment
+### 🔹 Security
 
-```bash
-docker-compose up --build -d
-```
+* Only **Nginx (Port 80)** is public
+* Backend & DB remain internal
 
 ---
 
-## 🌐 Application Access (Production)
+## 🌐 Application Access
 
-| 🧩 Service  | 🌍 URL                       |
-| ----------- | ---------------------------- |
-| Website     | `http://<EC2_PUBLIC_IP>`     |
-| Backend API | `http://<EC2_PUBLIC_IP>/api` |
-| MongoDB     | Internal (Docker Network)    |
-
-📌 If Nginx is configured:
-
-* Frontend → Port **80**
-* Backend → `/api` route
-
----
-
-## 🔁 Docker Management Commands
-
-```bash
-# View running containers
-docker-compose ps
-
-# View logs
-docker-compose logs -f
-
-# Restart services
-docker-compose restart
-
-# Stop services
-docker-compose down
-
-# Remove everything including DB
-docker-compose down -v
-```
-
----
-
-## 📁 Project Structure
-
-```text
-wanderly/
-├── docker-compose.yml
-├── src/
-│   ├── frontend/
-│   │   ├── Dockerfile
-│   │   └── ...
-│   ├── backend/
-│   │   ├── Dockerfile
-│   │   └── server.js
-│   └── nginx/
-│       └── default.conf
-└── README.md
-```
-
----
-
-## 🔧 Environment Variables (Production)
-
-### 🔐 Backend `.env`
-
-```env
-MONGO_URI=mongodb://mongodb:27017/wanderly
-PORT=5000
-NODE_ENV=production
-```
-
-### 🌐 Frontend `.env.local`
-
-```env
-NEXT_PUBLIC_API_URL=/api
-```
-
----
-
-## 🌍 Nginx Reverse Proxy
-
-This enables:
-
-* 🔗 Clean URLs
-* 🔐 Single public port (80)
-* 🛡️ Improved security
-
----
-
-## 🔐 HTTPS (SSL)
-
-```bash
-sudo yum install certbot -y
-```
-
-Configure SSL for Nginx using Let’s Encrypt.
-
----
-
-## 🚨 Production Best Practices
-
-✅ Use Elastic IP<br>
-✅ Enable HTTPS<br>
-✅ Do NOT expose MongoDB<br>
-✅ Use `.env` files<br>
-✅ Enable EC2 backups / snapshots<br>
-✅ Run containers in detached mode<br>
+| Feature         | URL                         |
+| --------------- | --------------------------- |
+| Website         | `http://<SERVER_PUBLIC_IP>` |
+| Admin Bookings  | `/admin/bookings`           |
+| Admin Inquiries | `/admin/inquiries`          |
+| Backend API     | `/api`                      |
 
 ---
 
@@ -227,126 +143,118 @@ Configure SSL for Nginx using Let’s Encrypt.
 ```bash
 docker ps
 curl http://localhost
-curl http://localhost/api/health
+curl http://localhost/api/bookings
+curl http://localhost/api/inquiries
 ```
 
 ---
 
-## ✅ Access App
+## 🎯 Where Else Can This Project Be Used?
 
-After setup, access your website using:
+Wanderly is **cloud-agnostic** and can be deployed in multiple enterprise environments.
+
+---
+
+## 🟣 Terraform (Infrastructure as Code)
+
+### 🔹 How to Use
+
+* Use Terraform to:
+
+  * Create EC2
+  * Configure Security Groups
+  * Attach Elastic IP
+  * Provision Docker
+
+### 🔹 Flow
 
 ```text
-http://<EC2_PUBLIC_IP>
+Terraform → EC2 → Docker → docker-compose up
 ```
 
-🚫 **Do NOT use**
+### 🔹 Benefit
 
-* ❌ `:3000`
-* ❌ `:5000`
-* ❌ `localhost`
-
-✅ **Only port 80 is exposed via Nginx**
+* Fully reproducible infrastructure
+* Version-controlled AWS resources
+* Ideal for production environments
 
 ---
 
-## 🧭 HOW ACCESS WORKS (UNDER THE HOOD)
+## 🟡 GitLab CI (CI/CD Pipeline)
+
+### 🔹 How to Use
+
+* Build Docker images in GitLab Runner
+* Push images to Docker Hub
+* Auto-deploy to EC2 using SSH
+
+### 🔹 Flow
 
 ```text
-Browser
-  |
-  |  http://EC2_PUBLIC_IP
-  |
-AWS Security Group (Port 80)
-  |
-Nginx container (Port 80)
-  |
-  ├── "/"     → frontend:3000 (Next.js)
-  └── "/api"  → backend:5000 (Express)
+Git Push → GitLab CI → Docker Build → Docker Hub → EC2 Pull
 ```
 
----
+### 🔹 Benefit
 
-### 🔁 Request Flow
-
-* Frontend loads from `/`
-* Backend API loads from `/api`
-* MongoDB remains **internal only**
+* Automated deployments
+* Zero manual intervention
+* Fast release cycles
 
 ---
 
-## 🟢 STEP-BY-STEP: ACCESS YOUR WEBSITE
+## 🟢 Amazon EKS (Kubernetes)
 
-### 1️⃣ Get EC2 Public IP
+### 🔹 How to Use
+
+* Convert Docker images to Kubernetes Deployments
+* Use:
+
+  * `Deployment`
+  * `Service`
+  * `Ingress (Nginx Controller)`
+* MongoDB via StatefulSet or managed service
+
+### 🔹 Flow
 
 ```text
-EC2 → Instances → Public IPv4 address
+Docker Images → EKS → Pods → Ingress → Users
 ```
 
-Example:
+### 🔹 Benefit
 
-```text
-3.110.xxx.xxx
-```
+* Auto-scaling
+* High availability
+* Enterprise-grade orchestration
 
 ---
 
-### 2️⃣ Verify Containers
+## 🔐 Production Best Practices
 
-```bash
-docker ps
-```
-
-Expected:
-
-```text
-nginx
-frontend
-backend
-mongodb
-```
-
-If not running:
-
-```bash
-docker-compose up -d
-```
+✅ Use HTTPS (Let’s Encrypt)
+✅ Use Elastic IP
+✅ Keep MongoDB internal
+✅ Use Docker Hub images
+✅ Enable EC2 backups
+✅ Use CI/CD for deployments
 
 ---
 
-🚀 Open your browser and visit:
+## 🏁 Final Notes
 
-```text
-http://<EC2_PUBLIC_IP>
-```
+This project is:
 
-Your **Wanderly website will load successfully** ✨
-
----
-
-## 🎯 Features
-
-✨ Premium UI / UX <br>
-🌙 Dark Mode<br>
-📱 Fully Responsive<br>
-🎭 Framer Motion Animations<br>
-🏔️ Destination Showcase<br>
-💳 Booking Flow<br>
-📧 WhatsApp & Contact Integration<br>
-🐳 Dockerized & Cloud Ready<br>
-⚡ Optimized Next.js Build<br>
-
----
-
-## 📞 Support & Contact
-
-**Wanderly Travel Platform**<br>
-📞 Phone: **+91 88884 74060**<br>
-💬 WhatsApp: **Chat with Guide**<br>
+* 🚀 Production-ready
+* 🔐 Secure by design
+* 🧩 Easily extendable
+* 🏢 Suitable for startups & enterprises
 
 ---
 
 ## 📝 License
 
-This project is **proprietary software**.
+This project is proprietary software.
 All rights reserved.
+
+---
+
+✨ **Wanderly is built to scale — from EC2 to EKS.**
