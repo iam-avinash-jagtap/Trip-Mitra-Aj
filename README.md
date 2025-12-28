@@ -1,14 +1,14 @@
 # 🌍 Wanderly — Premium Travel Booking Platform
 
-**Wanderly** is a modern, production-ready **travel booking & inquiry platform** designed for real-world scalability and cloud deployment.
+**Wanderly** is a modern, production-ready **travel booking & inquiry platform** built for scalability, security, and cloud-native deployments.
 
 It supports:
 
 * 🧳 Real-time trip bookings
 * 📩 Contact & inquiry management
 * 📊 Admin dashboards (Bookings & Inquiries)
-* 🐳 Fully Dockerized architecture
-* ☁️ Cloud-native deployment on AWS
+* 🐳 Fully Dockerized microservices
+* ☁️ Cloud deployment on AWS
 
 ---
 
@@ -18,7 +18,7 @@ It supports:
 
 * **Next.js 14**
 * **TypeScript**
-* Modern UI / UX (Admin dashboards, tables)
+* Modern Admin UI (tables, dashboards)
 
 ### ⚙️ Backend
 
@@ -29,12 +29,12 @@ It supports:
 ### 🗄️ Database
 
 * **MongoDB**
-* Persistent Docker volume (no data loss)
+* Persistent Docker volume
 
 ### 🚦 Reverse Proxy
 
 * **Nginx**
-* Single public entry point (Port 80)
+* Single public entry (Port 80)
 
 ### 🐳 Containerization
 
@@ -62,10 +62,6 @@ AWS EC2
    └── MongoDB Container (Internal only)
 ```
 
-✔ Secure
-✔ Scalable
-✔ Production-grade
-
 ---
 
 ## ☁️ Setup — AWS
@@ -73,7 +69,7 @@ AWS EC2
 ### ✅ EC2 Requirements
 
 * **OS**: Amazon Linux 2 / Amazon Linux 2023
-* **Instance Type**: `t2.micro` (minimum) / `t3.small` recommended
+* **Instance Type**: `t3.small` recommended
 * **Storage**: 20 GB
 * **Security Group**:
 
@@ -83,11 +79,77 @@ AWS EC2
 
 ---
 
-## 🚀 Quick Start (Production)
+### 🔐 SSH into EC2 Instance
 
-### 🔥 Only Two Commands Needed
+1️⃣ Download your EC2 key pair (`.pem` file)
 
-Once Docker & Docker Compose are installed on EC2:
+2️⃣ From your local machine:
+
+```bash
+chmod 400 your-key.pem
+```
+
+3️⃣ Connect to EC2:
+
+```bash
+ssh -i your-key.pem ec2-user@<EC2_PUBLIC_IP>
+```
+
+You are now logged into the server 🎉
+
+---
+
+## 🧰 Installation (Required Tools)
+
+After logging into EC2, install all required dependencies.
+
+---
+
+### 🔄 Update System Packages
+
+```bash
+sudo yum update -y
+```
+
+---
+
+### 🐳 Install Docker
+
+```bash
+sudo yum install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker ec2-user
+```
+
+Logout and login again for Docker permissions to apply.
+
+---
+
+### 🧩 Install Docker Compose
+
+```bash
+sudo curl -L https://github.com/docker/compose/releases/download/v2.27.0/docker-compose-linux-x86_64 \
+-o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose version
+```
+
+---
+
+### 🌱 Install Git
+
+```bash
+sudo yum install git -y
+git --version
+```
+
+---
+
+## 🚀 Quick Start (Production Deployment)
+
+Once installation is complete and `docker-compose.yml` is present:
 
 ```bash
 docker-compose pull
@@ -95,13 +157,13 @@ docker-compose up -d
 ```
 
 That’s it ✅
-No build. No source code required.
+Your application is live.
 
 ---
 
 ## 🧠 What `docker-compose.yml` Creates
 
-When you run `docker-compose up -d`, it automatically creates:
+When executed, Docker Compose automatically creates:
 
 ### 🔹 Containers
 
@@ -113,17 +175,17 @@ When you run `docker-compose up -d`, it automatically creates:
 ### 🔹 Network
 
 * `wanderly-network`
-* Private communication between containers
+* Secure internal container communication
 
 ### 🔹 Storage
 
 * `wanderly-storage`
-* Persistent MongoDB data across restarts
+* Persistent MongoDB data
 
 ### 🔹 Security
 
 * Only **Nginx (Port 80)** is public
-* Backend & DB remain internal
+* Backend & DB are internal
 
 ---
 
@@ -134,7 +196,6 @@ When you run `docker-compose up -d`, it automatically creates:
 | Website         | `http://<SERVER_PUBLIC_IP>` |
 | Admin Bookings  | `/admin/bookings`           |
 | Admin Inquiries | `/admin/inquiries`          |
-| Backend API     | `/api`                      |
 
 ---
 
@@ -151,20 +212,17 @@ curl http://localhost/api/inquiries
 
 ## 🎯 Where Else Can This Project Be Used?
 
-Wanderly is **cloud-agnostic** and can be deployed in multiple enterprise environments.
+Wanderly is **cloud-agnostic** and production-ready.
 
 ---
 
 ## 🟣 Terraform (Infrastructure as Code)
 
-### 🔹 How to Use
+### 🔹 Usage
 
-* Use Terraform to:
-
-  * Create EC2
-  * Configure Security Groups
-  * Attach Elastic IP
-  * Provision Docker
+* Provision EC2, Security Groups, Elastic IP
+* Install Docker via user-data
+* Deploy using Docker Compose
 
 ### 🔹 Flow
 
@@ -174,45 +232,39 @@ Terraform → EC2 → Docker → docker-compose up
 
 ### 🔹 Benefit
 
-* Fully reproducible infrastructure
+* Reproducible infrastructure
 * Version-controlled AWS resources
-* Ideal for production environments
 
 ---
 
 ## 🟡 GitLab CI (CI/CD Pipeline)
 
-### 🔹 How to Use
+### 🔹 Usage
 
-* Build Docker images in GitLab Runner
-* Push images to Docker Hub
-* Auto-deploy to EC2 using SSH
+* Build Docker images
+* Push to Docker Hub
+* Deploy automatically to EC2
 
 ### 🔹 Flow
 
 ```text
-Git Push → GitLab CI → Docker Build → Docker Hub → EC2 Pull
+Git Push → GitLab CI → Docker Hub → EC2 Pull
 ```
 
 ### 🔹 Benefit
 
 * Automated deployments
-* Zero manual intervention
-* Fast release cycles
+* Faster release cycles
 
 ---
 
 ## 🟢 Amazon EKS (Kubernetes)
 
-### 🔹 How to Use
+### 🔹 Usage
 
-* Convert Docker images to Kubernetes Deployments
-* Use:
-
-  * `Deployment`
-  * `Service`
-  * `Ingress (Nginx Controller)`
-* MongoDB via StatefulSet or managed service
+* Convert images to Kubernetes Deployments
+* Use Ingress (Nginx Controller)
+* MongoDB via StatefulSet or managed DB
 
 ### 🔹 Flow
 
@@ -234,19 +286,19 @@ Docker Images → EKS → Pods → Ingress → Users
 ✅ Use Elastic IP
 ✅ Keep MongoDB internal
 ✅ Use Docker Hub images
-✅ Enable EC2 backups
-✅ Use CI/CD for deployments
+✅ Enable backups
+✅ Use CI/CD pipelines
 
 ---
 
 ## 🏁 Final Notes
 
-This project is:
+Wanderly is:
 
 * 🚀 Production-ready
 * 🔐 Secure by design
 * 🧩 Easily extendable
-* 🏢 Suitable for startups & enterprises
+* 🏢 Enterprise-friendly
 
 ---
 
@@ -257,4 +309,4 @@ All rights reserved.
 
 ---
 
-✨ **Wanderly is built to scale — from EC2 to EKS.**
+✨ **Wanderly — built to scale from EC2 to EKS.**
